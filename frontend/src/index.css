@@ -1,0 +1,27 @@
+body {
+    height: 100vh;
+    min-height: 100vh;
+    margin: 0;
+}
+#root {
+    height: 100%;
+    width: 100%;
+    --b: #4096ff;
+    --m: #1890ff;
+    --lm: #90b9ce;
+    --llm: #5b9bbc;
+    --w: white;
+}
+* {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    list-style: none;
+}
+
+img {
+    vertical-align: top;
+    border: none;
+}

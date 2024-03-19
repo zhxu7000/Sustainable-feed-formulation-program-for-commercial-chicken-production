@@ -1,0 +1,144 @@
+
+
+商业鸡生产的可持续饲料配方计划
+项目描述和范围：
+最低成本饲料配方方案供家禽营养师配制日粮，以满足鸡在不同生产阶段的营养需求。这包括饲料原料成本、营养成分和动物营养需求之间的线性优化。可以选择不同的优化器，例如，减少排放或最佳生长性能的运输距离，但不是最低的饲料成本。
+预期成果/可交付成果：
+用于动物科学本科教学的饲料配方程序（适用于 Windows 和 Mac）。
+具体所需的知识、技能和/或技术：
+较强的编程和数据分析能力；交互式软件或应用程序开发 
+相关一般领域/学科：
+网页开发；软件开发；算法；数据科学/分析；
+客户提供的资源：
+概念 5（编辑版）
+
+P14 – Sustainable feed formulation program for commercial chicken production
+Client: Faculty of Science, SOLES
+Project Description and Scope:
+least cost feed formulation program is used for poultry nutritionist to formulate diet to satisfy nutrient requirements of chickens at different production stage. This includes linear optimisation between feed ingredient cost, nutrient content and animal nutrient requirements. different optimizers can be selected to, for example, distance of transportation for less emission or best growth performance but not the least feed cost.
+Expected outcomes/deliverables:
+Feed formulation program (both window and Mac friendly) for animal science undergraduate teaching.
+Specific required knowledge, skills, and/or technology:
+Strong programming and data analysis skills; Interactive software or app development 
+Related general fields/disciplines:
+Web Development;Software Development;Algorithms;Data Science/Analytics;
+Resources provided by the client:
+Concept 5 (ed version)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+后台设计说明：
+
+MaterialAttribute（材料属性）:
+描述: 代表原材料可能具有的各种属性。例如，一种材料的颜色、硬度或其他特性。
+用途: 用于为原材料分类和记录特性，以更好地描述和管理鸡饲料的成分。
+RawMaterial（原材料）:
+描述: 鸡饲料配方中使用的基础材料或成分。例如，玉米、大豆等。
+用途: 记录每种鸡饲料中所包含的各种原材料。
+MaterialAttributeValue（材料属性值）:
+描述: 描述原材料具体的属性值，如某种材料的颜色为“红色”。
+用途: 为RawMaterial与MaterialAttribute之间提供一个连接，使我们可以为每种原材料赋予特定的属性值。
+Recipe（饲料配方）:
+描述: 描述如何制作特定类型的鸡饲料，包括所需的原材料及其比例。
+用途: 提供鸡饲料的制作指南，确保每批饲料都按照相同的配方进行生产。
+RecipeRawMaterial（配方原材料）:
+描述: 在特定饲料配方中，原材料的具体使用情况，如使用量、最大/最小比例等。
+用途: 记录饲料配方中每种原材料的详细使用信息，确保饲料生产过程中，每种原材料都按照指定的量和比例添加。
+Receipt（收据/订单）:
+描述: 当饲料被销售时，记录的交易详情。
+用途: 跟踪饲料的销售情况，管理财务和库存。
+Element（元素/组分）:
+描述: 在鸡饲料中可能出现的微量或宏量成分，如某种矿物、维生素等。
+用途: 详细记录原材料中的每一种成分，帮助确保饲料的营养均衡。
+RecipeMaterialElementContent（配方材料元素含量）:
+描述: 在特定饲料配方的原材料中，各个元素的具体含量或比例。
+用途: 为生产过程提供指南，确保鸡饲料中每种原材料都包含正确的元素含量。
+
+MaterialAttribute:
+Fields:
+name: 材料属性的名称。
+description: 描述此属性的信息（可选）。
+data_type: 此属性的数据类型（数字、颜色、文本等）。
+Purpose: 表示原材料的各种属性，例如颜色、数值或文本属性。可以根据需要扩展更多数据类型。
+Relations: 与RawMaterial模型通过MaterialAttributeValue模型形成多对多关系。
+RawMaterial:
+Fields:
+name: 原材料的名称。
+Purpose: 表示用于制作鸡饲料的各种原材料。
+Relations: 与MaterialAttribute通过MaterialAttributeValue模型建立多对多关系。此外，与Recipe模型通过RecipeRawMaterial模型建立多对多关系。
+MaterialAttributeValue:
+Fields:
+raw_material: 指向RawMaterial模型的外键，表示具有某个属性值的原材料。
+attribute: 指向MaterialAttribute模型的外键，表示原材料的某个属性。
+value: 该属性的值，使用TextField以存储各种数据类型。
+Purpose: 这是RawMaterial和MaterialAttribute之间的"through"模型，用于存储原材料的具体属性值。
+Relations: 与RawMaterial和MaterialAttribute模型均建立了一对多关系。
+Recipe:
+Fields:
+name: 饲料配方的名称。
+Purpose: 表示鸡饲料的配方。
+Relations: 与RawMaterial通过RecipeRawMaterial模型建立多对多关系。
+RecipeRawMaterial:
+Fields:
+raw_material: 指向RawMaterial模型的外键，表示配方中使用的原材料。
+recipe: 指向Recipe模型的外键，表示原材料属于哪个配方。
+max_percentage, min_percentage: 定义在制作饲料时，该原材料可以占据的最大和最小百分比。
+min_weight_kg_per_ton, max_weight_kg_per_ton: 定义在制作饲料时，该原材料的最小和最大重量（以千克/吨为单位）。
+Purpose: 是Recipe和RawMaterial之间的"through"模型，用于存储配方中原材料的详细使用情况。
+Relations: 与Recipe和RawMaterial模型均建立了一对多关系。
+Receipt:
+Fields:
+recipe: 指向Recipe模型的外键，表示销售的鸡饲料配方。
+total_price: 该配方的总价。
+date: 销售日期。
+Purpose: 表示鸡饲料的销售收据或订单。
+Relations: 与Recipe模型建立了一对多关系。
+Element:
+Fields:
+name: 元素的名称。
+description: 描述此元素的信息（可选）。
+Purpose: 表示可能存在于原材料中的化学元素或其他组成部分。
+Relations: 与RecipeMaterialElementContent模型建立了一对多关系。
+RecipeMaterialElementContent:
+Fields:
+recipe_material: 指向RecipeRawMaterial模型的外键，表示在某个配方中使用的原材料。
+element: 指向Element模型的外键，表示原材料中的某个元素。
+percentage_content: 元素在原材料中的百分比含量。
+Purpose: 存储每种原材料中各个元素的百分比含量。
+Relations: 与RecipeRawMaterial和Element模型均建立了一对多关系。
+

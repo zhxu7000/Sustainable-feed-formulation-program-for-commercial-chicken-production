@@ -1,0 +1,260 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimal Mix</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<h1 class="text-center my-4">Welcome to the Optimal Feed Mix Generator</h1>
+
+<div class="container">
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#materials" data-toggle="tab">Materials</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#attributes" data-toggle="tab">Material Attributes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#recipe" data-toggle="tab">Selected Recipe</a>
+        </li>
+    </ul>
+
+
+
+    <!-- Tab Contents -->
+    <div class="tab-content mt-4">
+        <!-- Materials Data -->
+        <div class="tab-pane fade show active" id="materials">
+            <h3 class="mb-4">Materials:</h3>
+    <!-- Your HTML content here -->
+    <button id="add-material-btn" class="btn btn-primary mb-3">Add Material</button>
+    <!-- Add Material Modal -->
+    <div class="modal fade" id="addMaterialModal" tabindex="-1" role="dialog" aria-labelledby="addMaterialModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMaterialModalLabel">Add New Material</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-material-form">
+                        <div class="form-group">
+                            <label for="material-name">Material Name</label>
+                            <input type="text" class="form-control" id="material-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cost-per-tonne">Cost per Tonne</label>
+                            <input type="number" class="form-control" id="cost-per-tonne" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Material</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- Modal content here -->
+    </div>
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Material Name</th>
+                    <th>Cost per Tonne</th>
+                    <th>Select</th> <!-- Added Select column -->
+                </tr>
+                </thead>
+                <tbody>
+                {% for material_data in materials %}
+                <tr>
+                    <td contenteditable="true">{{ material_data.id }}</td>
+                    <td contenteditable="true">{{ material_data.name }}</td>
+                    <td contenteditable="true">{{ material_data.cost_per_tonne }}</td>
+                    <td><input type="checkbox" class="selected-material" {% if material_data.selected %}checked{% endif%}></td> <!-- 新增列 -->
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Selected Recipe Data -->
+        <div class="tab-pane fade" id="recipe">
+            <h3 class="mb-4">Selected Recipe: <span class="font-weight-bold">{{ selected_recipe.name }}</span></h3>
+            <h5>Total Tons: <span class="font-weight-bold">{{ selected_recipe.total_tons }}</span></h5>
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Material Name</th>
+                    <th>Min Percentage</th>
+                    <th>Max Percentage</th>
+                    <th>Min Weight (kg/ton)</th>
+                    <th>Max Weight (kg/ton)</th>
+                    <th>Selected</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for material in materials %}
+                <tr>
+                    <td>{{ material.id }}</td>
+                    <td>{{ material.name }}</td>
+                    <td>{{ material.min_percentage }}</td>
+                    <td>{{ material.max_percentage }}</td>
+                    <td>{{ material.min_weight }}</td>
+                    <td>{{ material.max_weight }}</td>
+                    <td><input type="checkbox" class="selected-material" {% if material.selected %}checked{% endif%}></td> <!-- 新增列 -->
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="attributes">
+            <h3 class="mb-4">Material Attributes:</h3>
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>Material Name</th>
+                    <th>Selected</th> <!-- 新增列 -->
+                    {% for attribute_name in all_attribute_names %}
+                    <th>{{ attribute_name }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for material in materials_attributes %}
+                <tr>
+                    <td>{{ material.name }}</td>
+                    <td><input type="checkbox" class="selected-attribute" {% if material.selected %}checked{% endif %}>
+                    </td> <!-- 新增列 -->
+                    {% for attribute in material.attributes_list %}
+                    <td contenteditable="true">{{ attribute.value }}</td> <!-- Made editable -->
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+<form method="post" class="text-center my-4">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary btn-lg">Find Optimal Mix</button>
+</form>
+<div class="text-center my-4">
+    <a href="{% url 'download_pdf' %}" class="btn btn-secondary btn-lg">Download Data as PDF</a>
+</div>
+
+{% if result and result != "No optimal solution found!" %}
+<div class="container my-4">
+    <h2 class="mb-3">Optimal Mix Results:</h2>
+    <ul class="list-group">
+        {% for material_name, percentage in result.items %}
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col-md-6">
+                    {{ material_name }}
+                </div>
+                <div class="col-md-2 text-center">
+                    <span class="badge badge-primary badge-pill">{{ percentage }}%</span>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% elif result == "No optimal solution found!" %}
+<div class="container my-4">
+    <h2 class="mb-3 text-danger">No optimal solution found!</h2>
+</div>
+{% endif %}
+
+
+    <script>
+        $(document).ready(function() {
+            let materials = [];
+
+            // Show the modal when the button is clicked
+            $("#add-material-btn").click(function() {
+                $("#addMaterialModal").modal('show');
+            });
+
+
+
+            // Handle the form submission
+            $("#add-material-form").submit(function(e) {
+                e.preventDefault();
+
+                const newMaterial = {
+                    name: $("#material-name").val(),
+                    cost_per_tonne: parseFloat($("#cost-per-tonne").val())
+                };
+
+                materials.push(newMaterial);
+
+                // Close the modal
+                $("#addMaterialModal").modal('hide');
+
+                // Clear the form
+                $("#add-material-form")[0].reset();
+
+                // Update the table or other UI elements
+                // ...
+            });
+
+            // Handle the calculation (you'll need to add an ID to your form button)
+            $("#calculate-btn").click(function() {
+                $.ajax({
+                    url: '/calculate',  // Replace with your server URL
+                    method: 'POST',
+                    data: JSON.stringify({ materials }),
+                    contentType: 'application/json',
+                    success: function(data) {
+                        // Update the UI based on the result
+                        // ...
+                    }
+                });
+            });
+
+        // 处理可编辑单元格
+        $("td[contenteditable=true]").blur(function() {
+            const newValue = $(this).text();
+            const materialId = $(this).closest("tr").find(".select-material").val();
+            // TODO: 将新值和 materialId 更新到服务器
+        });
+
+        // 处理 Selected 复选框
+        $(".selected-material").change(function() {
+            const materialId = $(this).closest("tr").find(".select-material").val();
+            const isSelected = $(this).is(":checked");
+            // TODO: 将 Selected 状态和 materialId 更新到服务器
+        });
+
+        // 处理 Selected 复选框（材料属性）
+        $(".selected-attribute").change(function() {
+            const materialName = $(this).closest("tr").find("td:first").text();
+            const isSelected = $(this).is(":checked");
+            // TODO: 将 Selected 状态和 materialName 更新到服务器
+        });
+
+        // 处理 Total Tons 的 Selected 复选框
+        $(".selected-total-tons").change(function() {
+            const isSelected = $(this).is(":checked");
+            // TODO: 将 isSelected 状态更新到服务器
+        });
+        });
+    </script>
+</body>
+
+</html>
